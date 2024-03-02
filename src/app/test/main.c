@@ -2,8 +2,25 @@
 #include "sys_plat.h"
 
 
+void thread1(void * string) {
+    while (1) {
+        plat_printf("thread1: %s\n", (char *) string);
+        sys_sleep(1000);
+    }
+}
+void thread2(void * string) {
+    while (1) {
+        plat_printf("thread2: %s\n", (char *) string);
+        sys_sleep(1000);
+    }
+}
+
 int main (void) 
 {
+    sys_thread_create(thread1, "AAAAA");
+    sys_thread_create(thread2, "BBBBB");
+
+
     pcap_t * pcap = pcap_device_open(netdev0_phy_ip_linux, netdev0_hwaddr_linux);
     while (pcap) {
         static uint8_t buffer[1514];
