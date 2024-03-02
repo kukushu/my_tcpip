@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "setcap net",
+            "type": "shell",
+            "command": "sudo setcap cap_net_raw,cap_net_admin+ep /home/kukushu/tcpip/my_tcpip/build/net",
+            "problemMatcher":[],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
