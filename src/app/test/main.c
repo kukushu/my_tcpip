@@ -1,19 +1,21 @@
 #include <stdio.h>
 #include "sys_plat.h"
+#include <stdatomic.h>
 
 static sys_sem_t sem;
+atomic_int value = ATOMIC_VAR_INIT(0);
+
 void thread1(void * string) {
-    while (1) {
-        plat_printf("thread1: %s\n", (char *) string);
-        sys_sem_notify(sem);
-        sys_sleep(1000);
+    for (int i = 0; i < 1000000; i ++) {
+        atomic_fetch_add(&value, 1);
     }
+    plat_printf("thread1 %d\n", value);
 }
 void thread2(void * string) {
-    while (1) {
-        sys_sem_wait(sem, 0);
-        plat_printf("thread2: %s\n", (char *) string);
+    for (int i = 0; i < 1000000; i ++) {
+        atomic_fetch_sub(&value, 1);
     }
+    plat_printf("thread2 %d\n", value);
 }
 
 int main (void) 
