@@ -1,22 +1,24 @@
 #include <stdio.h>
 #include "sys_plat.h"
 
-
+static sys_sem_t sem;
 void thread1(void * string) {
     while (1) {
         plat_printf("thread1: %s\n", (char *) string);
+        sys_sem_notify(sem);
         sys_sleep(1000);
     }
 }
 void thread2(void * string) {
     while (1) {
+        sys_sem_wait(sem, 0);
         plat_printf("thread2: %s\n", (char *) string);
-        sys_sleep(1000);
     }
 }
 
 int main (void) 
 {
+    sem = sys_sem_create(0);
     sys_thread_create(thread1, "AAAAA");
     sys_thread_create(thread2, "BBBBB");
 
@@ -27,7 +29,6 @@ int main (void)
         static int counter = 0;
         struct pcap_pkthdr * pkthdr;
         const uint8_t * pkt_data;
-
 
 
         plat_printf("begin test: %d\n", counter ++);
