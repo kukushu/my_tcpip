@@ -11,6 +11,7 @@ add_compile_options(-g)
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/src/plat
+    ${PROJECT_SOURCE_DIR}/src/net/net
 )
 
 file(GLOB_RECURSE SOURCE_LIST "src/*.c" "src/*.h")
