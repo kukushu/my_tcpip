@@ -3,24 +3,30 @@
 #include <stdatomic.h>
 
 static sys_sem_t sem;
-atomic_int value = ATOMIC_VAR_INIT(0);
+static sys_mutex_t mutex;
+static int count;
 
 void thread1(void * string) {
     for (int i = 0; i < 1000000; i ++) {
-        atomic_fetch_add(&value, 1);
+        sys_mutex_lock(mutex);
+        count ++;
+        sys_mutex_unlock(mutex);
     }
-    plat_printf("thread1 %d\n", value);
+    plat_printf("thread1 %d\n", count);
 }
 void thread2(void * string) {
     for (int i = 0; i < 1000000; i ++) {
-        atomic_fetch_sub(&value, 1);
+        sys_mutex_lock(mutex);
+        count --;
+        sys_mutex_unlock(mutex);
     }
-    plat_printf("thread2 %d\n", value);
+    plat_printf("thread2 %d\n", count);
 }
 
 int main (void) 
 {
-    sem = sys_sem_create(0);
+    mutex = sys_mutex_create();
+    count = 0;
     sys_thread_create(thread1, "AAAAA");
     sys_thread_create(thread2, "BBBBB");
 
