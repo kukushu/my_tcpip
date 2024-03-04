@@ -3,6 +3,9 @@
 #include "netif_pcap.h"
 #include "dbg.h"
 #include "net_cfg.h"
+#include "nlist.h"
+
+
 
 net_err_t netdev_init (void) {
     netif_pcap_open();
@@ -18,9 +21,69 @@ void dbg_test (void) {
 }
 
 
+typedef struct _tnode_t {
+    int id;
+    nlist_node_t node;
+} tnode_t;
+void nlist_test (void) {
+    #define NODE_CNT    10
+    tnode_t node[NODE_CNT];
+    nlist_t list;
+    nlist_node_t * p;
+
+    nlist_init(&list);
+    for (int i = 0; i < NODE_CNT; i ++) {
+        node[i].id = i;
+        nlist_insert_first(&list, &node[i].node);
+    }
+
+    plat_printf("insert first\n");
+    nlist_for_each(p, list) {
+        tnode_t * tnode = nlist_entry(p, tnode_t, node);
+        plat_printf("%d\n", tnode->id);
+    }
+
+    plat_printf("remove first\n");
+    for (int i = 0; i < NODE_CNT; i ++) {
+        p = nlist_remove_first(&list);
+        plat_printf("id: %d\n", nlist_entry(p, tnode_t, node)->id);
+    }        
+
+    for (int i = 0; i < NODE_CNT; i ++) {
+        nlist_insert_last(&list, &node[i].node);
+    }
+
+    plat_printf("insert last\n");
+    nlist_for_each(p, list) {
+        tnode_t * tnode = nlist_entry(p, tnode_t, node);
+        plat_printf("%d\n", tnode->id);
+    }
+
+    plat_printf("remove last\n");
+    for (int i = 0; i < NODE_CNT; i ++) {
+        p = nlist_remove_last(&list);
+        plat_printf("id: %d\n", nlist_entry(p, tnode_t, node)->id);
+    }
+
+    plat_printf("insert after\n");
+    for (int i = 0; i < NODE_CNT; i ++) {
+        nlist_insert_after(&list, nlist_first(&list), &node[i].node);
+    }
+    nlist_for_each(p, list) {
+        tnode_t * tnode = nlist_entry(p, tnode_t, node);
+        plat_printf("%d\n", tnode->id);
+    }
+
+}
+
+void basic_test (void) {
+    //nlist_test();
+}
+
 int main (void) 
 {
     //dbg_test();
+    basic_test();
     net_init();
     net_start();
 
