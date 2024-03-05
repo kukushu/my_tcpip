@@ -4,6 +4,7 @@
 #include "dbg.h"
 #include "net_cfg.h"
 #include "nlist.h"
+#include "mblock.h"
 
 
 
@@ -16,7 +17,7 @@ void dbg_test (void) {
     dbg_error(DBG_TEST, "dbg_info : %s\n", "just_for_test");
     dbg_warning(DBG_TEST, "dbg_info : %s\n", "just_for_test");
     dbg_info(DBG_TEST, "dbg_info : %s\n", "just_for_test");
-    dbg_debug(2 == 1, "failed");
+    dbg_assert(2 == 1, "failed");
 
 }
 
@@ -76,8 +77,27 @@ void nlist_test (void) {
 
 }
 
+void mblock_test (void) {
+    mblock_t blist;
+    static uint8_t buffer[10][100];
+
+    void * temp[10];
+    mblock_init(&blist, buffer, 100, 10, NLOCKER_THREAD);
+    for (int i = 0; i < 10; i ++) {
+        temp[i] = mblock_alloc(&blist, 0);
+        printf("block: %p, free count: %d\n", temp[i], mblock_free_cnt(&blist));
+    }
+    for (int i = 0; i < 10; i ++) {
+        mblock_free(&blist, temp[i]);
+        printf("free count: %d\n", mblock_free_cnt(&blist));
+    }
+    mblock_destroy(&blist);
+}
+
+
 void basic_test (void) {
     //nlist_test();
+    mblock_test();
 }
 
 int main (void) 

@@ -66,7 +66,7 @@ typedef struct timeval net_time_t;      // 时间类型
 
 #define SYS_THREAD_INVALID          (sys_thread_t)0
 #define SYS_SEM_INVALID             (sys_sem_t)0
-#define SYS_MUTEx_INVALID           (sys_mutex_t)0
+#define SYS_MUTEX_INVALID           (sys_mutex_t)0
 
 #define plat_strlen         strlen
 #define plat_strcpy         strcpy

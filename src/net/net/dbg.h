@@ -1,6 +1,8 @@
 #ifndef DBG_H
 #define DBG_H
 
+#include "net_cfg.h"
+
 #define DBG_STYLE_RESET     "\033[0m"
 #define DBG_STYLE_ERROR     "\033[31m"
 #define DBG_STYLE_WARNING   "\033[33m"
@@ -15,7 +17,7 @@ void dbg_print(int m_level, int s_level, const char * file, const char * func, i
 #define dbg_error(module, fmt, ...)  dbg_print(module, DBG_LEVEL_ERROR, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #define dbg_warning(module, fmt, ...)  dbg_print(module, DBG_LEVEL_WARNING, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 
-#define dbg_debug(expr, msg) {\
+#define dbg_assert(expr, msg) {\
     if (!(expr)) {\
         dbg_print(DBG_LEVEL_ERROR, DBG_LEVEL_ERROR, __FILE__, __FUNCTION__, __LINE__, "assert failed: "#expr", "msg);\
         while (1);\
