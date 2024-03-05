@@ -20,7 +20,9 @@ void dbg_print(int m_level, int s_level, const char * file, const char * func, i
 #define dbg_assert(expr, msg) {\
     if (!(expr)) {\
         dbg_print(DBG_LEVEL_ERROR, DBG_LEVEL_ERROR, __FILE__, __FUNCTION__, __LINE__, "assert failed: "#expr", "msg);\
-        while (1);\
+        while (1) {\
+            sleep(1);\
+        }\
     }\
 }
 

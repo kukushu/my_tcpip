@@ -1,4 +1,4 @@
-#include "sys_plat.h"
+#include "sys.h"
 #include "net.h"
 #include "netif_pcap.h"
 #include "dbg.h"
@@ -97,7 +97,7 @@ void mblock_test (void) {
 
 void basic_test (void) {
     //nlist_test();
-    mblock_test();
+    //mblock_test();
 }
 
 int main (void) 

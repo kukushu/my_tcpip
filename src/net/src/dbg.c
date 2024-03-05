@@ -1,5 +1,5 @@
 #include "dbg.h"
-#include "sys_plat.h"
+#include "sys.h"
 #include <stdarg.h>
 
 
@@ -28,7 +28,7 @@ void dbg_print(int m_level, int s_level, const char * file, const char * func, i
 
         va_start(args, fmt);
         plat_vsprintf(str_buf, fmt, args);
-        plat_printf("%s"DBG_STYLE_RESET, str_buf);
+        plat_printf("%s"DBG_STYLE_RESET"\n", str_buf);
         va_end(args);
     }
 }

@@ -6,7 +6,7 @@ LINK_DIRECTORIES(
 
 )
 
-add_compile_options(-g)
+add_compile_options(-g -O0)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}
