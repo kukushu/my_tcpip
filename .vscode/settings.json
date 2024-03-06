@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.c": "cpp",
+        "stdint.h": "c",
+        "nlocker.h": "c",
+        "net_err.h": "c"
+    }
+}

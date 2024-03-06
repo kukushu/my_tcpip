@@ -4,7 +4,7 @@
 #include "nlist.h"
 
 net_err_t mblock_init (mblock_t * mblock, void * mem, int blk_size, int cnt, nlocker_type_t type) {
-    dbg_assert(blk_size >= sizeof(nlist_node_t), "size error");
+    dbg_assert(blk_size >= sizeof(nlist_node_t), "mblock init size error");
      
     uint8_t * buf = (uint8_t *) mem;
     nlist_init(&mblock->free_list);

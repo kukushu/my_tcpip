@@ -9,6 +9,7 @@ net_err_t nlocker_init (nlocker_t * locker, nlocker_type_t type) {
         locker->mutex = mutex;
     }
     locker->type = type;
+    return NET_ERR_OK;
 }
 void nlocker_destroy (nlocker_t * locker) {
     if (locker->type == NLOCKER_THREAD) {

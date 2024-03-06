@@ -5,7 +5,7 @@
 #include "net_cfg.h"
 #include "nlist.h"
 #include "mblock.h"
-
+#include "pktbuf.h"
 
 
 net_err_t netdev_init (void) {
@@ -94,17 +94,29 @@ void mblock_test (void) {
     mblock_destroy(&blist);
 }
 
+void pktbuf_test(void) {
+    static uint16_t temp[1000];
+    static uint16_t read_temp[1000];
+
+    for (int i = 0; i < 1024; i ++) {
+        temp[i] = i;
+    }
+
+    pktbuf_t * buf = pktbuf_alloc(2000);
+    pktbuf_free(buf);
+}
 
 void basic_test (void) {
     //nlist_test();
     //mblock_test();
+    pktbuf_test();
 }
 
 int main (void) 
 {
     //dbg_test();
-    basic_test();
     net_init();
+    basic_test();
     net_start();
 
     netdev_init();
