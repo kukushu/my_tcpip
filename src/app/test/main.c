@@ -104,8 +104,21 @@ void pktbuf_test(void) {
 
     pktbuf_t * buf = pktbuf_alloc(2000);
     pktbuf_free(buf);
-}
 
+    net_err_t err;
+    buf = pktbuf_alloc(2000);
+    for (int i = 0; i < 16; i ++) {
+        err = pktbuf_add_header(buf, 33, CONTINUE);
+        dbg_assert(err == NET_ERR_OK, "pktbuf_add_header continue failed");
+    }
+    for (int i = 0; i < 16; i ++) {
+        err = pktbuf_remove_header(buf, 33); 
+        dbg_assert(err == NET_ERR_OK, "pktbuf_remove_header failed");
+    }
+
+
+
+}
 void basic_test (void) {
     //nlist_test();
     //mblock_test();
