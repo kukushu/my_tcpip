@@ -7,8 +7,8 @@
 #include "net_cfg.h"
 
 typedef enum {
-    CONTINUE,
-    NOT_CONT
+    CONTINUE = 1,
+    NOT_CONT = 0
 } add_head_mth;
 
 typedef struct _pktblk_t {
@@ -43,9 +43,10 @@ static inline pktblk_t * pktbuf_blk_last(pktbuf_t * pktbuf) {
 net_err_t pktbuf_init (void);
 pktbuf_t * pktbuf_alloc (int size);
 void pktbuf_free (pktbuf_t * buf);
-net_err_t pktbuf_add_header (pktbuf_t * buf, int size, add_head_mth is_continue);
-net_err_t pktbuf_remove_header (pktbuf_t * buf, int size);
+net_err_t pktbuf_add_header (pktbuf_t * pktbuf, int size, add_head_mth is_continue);
+net_err_t pktbuf_remove_header (pktbuf_t * pktbuf, int size);
 
+void pktbuf_check (pktbuf_t * pktbuf);
 
 
 #endif

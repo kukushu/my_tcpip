@@ -102,19 +102,22 @@ void pktbuf_test(void) {
         temp[i] = i;
     }
 
-    pktbuf_t * buf = pktbuf_alloc(2000);
-    pktbuf_free(buf);
 
     net_err_t err;
-    buf = pktbuf_alloc(2000);
-    for (int i = 0; i < 16; i ++) {
-        err = pktbuf_add_header(buf, 33, CONTINUE);
+    pktbuf_t * buf = pktbuf_alloc(200);
+    pktbuf_check(buf);
+    for (int i = 0; i < 3; i ++) {
+        err = pktbuf_add_header(buf, 80, NOT_CONT);
         dbg_assert(err == NET_ERR_OK, "pktbuf_add_header continue failed");
     }
-    for (int i = 0; i < 16; i ++) {
-        err = pktbuf_remove_header(buf, 33); 
+    pktbuf_check(buf);
+    for (int i = 0; i < 3; i ++) {
+        err = pktbuf_remove_header(buf, 78); 
         dbg_assert(err == NET_ERR_OK, "pktbuf_remove_header failed");
+        pktbuf_check(buf);
     }
+
+
 
 
 
