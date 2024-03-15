@@ -11,14 +11,27 @@ static fixq_t msg_queue;
 static exmsg_t msg_buffer[EXMSG_MSG_CNT];
 static mblock_t msg_block;
 
+static void do_netif_in (exmsg_t * msg) {
+
+}
+
 static void work_thread (void * arg) {
     dbg_info(DBG_EXMSG, "exmsg is running.....\n");
 
     while (1) {
         exmsg_t * msg = (exmsg_t *) fixq_recv(&msg_queue, 0);
-        plat_printf("recv a msg type: %d, id: %d\n",msg->type, msg->id);
-        mblock_free(&msg_block, msg);
-        sys_sleep(1000);
+        if (msg) {
+            dbg_info(DBG_EXMSG, "recieve a msg(%p): %d", msg, msg->type);
+            switch (msg->type) {
+                case NET_EXMSG_NETIF_IN:
+                    do_netif_in(msg);
+                    break;
+                case NET_EXMSG_FUN:
+                    //do_func(msg->func);
+                    break;
+            }
+            mblock_free(&msg_block, msg);
+        }
     }
 }
 
@@ -46,20 +59,20 @@ net_err_t exmsg_start (void) {
     return NET_ERR_OK;
 }
 
-net_err_t exmsg_netif_in (void) {
+net_err_t exmsg_netif_in (netif_t * netif) {
     exmsg_t * msg = mblock_alloc(&msg_block, -1);
     if (!msg) {
         dbg_warning(DBG_EXMSG, "no free msg");
         return NET_ERR_MEM;
     }
-    static int id = 0;
     msg->type = NET_EXMSG_NETIF_IN;
-    msg->id = id ++;
+    msg->netif = netif;
+
     net_err_t err = fixq_send(&msg_queue, msg, -1);
     if (err < 0) {
         dbg_warning(DBG_EXMSG, "fixq full");
         mblock_free(&msg_block, msg);
         return err;
     }
-    return err;
+    return NET_ERR_OK;
 }

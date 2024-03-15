@@ -1,11 +1,22 @@
 #include "net.h"
 #include "exmsg.h"
 #include "net_plat.h"
+#include "dbg.h"
+#include "netif.h"
+#include "pktbuf.h"
+#include "loop.h"
+#include "ether.h"
+
  
 net_err_t net_init (void) {
+    dbg_info(DBG_INIT, "net_init");
     net_plat_init();
+
     exmsg_init();
     pktbuf_init();
+    netif_init();
+    ether_init();
+    loop_init();
     return NET_ERR_OK;
 }
 

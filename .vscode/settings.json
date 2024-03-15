@@ -3,6 +3,13 @@
         "*.c": "cpp",
         "stdint.h": "c",
         "nlocker.h": "c",
-        "net_err.h": "c"
+        "net_err.h": "c",
+        "net_plat.h": "c",
+        "sys_plat.h": "c",
+        "dbg.h": "c",
+        "net_cfg.h": "c",
+        "exmsg.h": "c",
+        "net.h": "c",
+        "netif.h": "c"
     }
 }
