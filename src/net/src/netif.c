@@ -1,6 +1,7 @@
 #include "netif.h"
 #include "mblock.h"
 #include "fixq.h"
+#include "exmsg.h"
 
 static netif_t netif_buffer[NETIF_DEV_CNT];
 static mblock_t netif_mblock;
@@ -132,11 +133,72 @@ net_err_t netif_put_in (netif_t * netif, pktbuf_t * pktbuf, int tmo) {
     return NET_ERR_OK;
 }
 pktbuf_t * netif_get_in (netif_t * netif, int tmo) {
-    
+    pktbuf_t * buf = fixq_recv(&netif->in_q, tmo);
+    if (buf) {
+        pktbuf_reset_acc(buf);
+        return buf;
+    } 
+    dbg_info(DBG_NETIF, "netif %s in_q empty", netif->name);
+    return (pktbuf_t *) 0;
 }
-net_err_t netif_put_out (netif_t * netif, pktbuf_t * ptkbuf, int tmo) {
+net_err_t netif_put_out (netif_t * netif, pktbuf_t * pktbuf, int tmo) {
+    net_err_t err;
+    err = fixq_send(&netif->out_q, pktbuf, tmo);
+    if (err != NET_ERR_OK) {
+        dbg_warning(DBG_NETIF, "netif_put_out failed fixq_out is full");
+        return NET_ERR_FULL;
+    }
     return NET_ERR_OK;
 }
 pktbuf_t * netif_get_out (netif_t * netif, int tmo) {
+    pktbuf_t * buf = fixq_recv(&netif->out_q, tmo);
+    if (buf) {
+        pktbuf_reset_acc(buf);
+        return buf;
+    }
+    dbg_info(DBG_NETIF, "netif %s out_q empty", netif->name);
+    return (pktbuf_t *) 0;
+}
+net_err_t netif_set_addr (netif_t * netif, ipaddr_t * ip, ipaddr_t * netmask, ipaddr_t * gateway) {
 
+    ipaddr_copy(&netif->ipaddr, ip ? ip : ipaddr_get_any());
+    ipaddr_copy(&netif->gateway, gateway ? gateway : ipaddr_get_any());
+    ipaddr_copy(&netif->netmask, netmask ? netmask : ipaddr_get_any());
+
+    return NET_ERR_OK;
+}
+
+
+net_err_t netif_set_active(netif_t * netif) {
+    if (netif->state != NETIF_OPENED) {
+        dbg_error(DBG_NETIF, "netif is not opened");
+        return NET_ERR_STATE;
+    }
+    if (netif->link_layer) {
+        net_err_t err = netif->link_layer->open(netif);
+        if (err < 0) {
+            dbg_info(DBG_NETIF, "active error.");
+            return err;
+        }
+    }
+}
+
+net_err_t netif_out (netif_t * netif, ipaddr_t * ipaddr, pktbuf_t * pktbuf) {
+    if (netif->link_layer) {
+        net_err_t err = netif->link_layer->out(netif, ipaddr, pktbuf);
+        if (err < 0) {
+            dbg_warning(DBG_NETIF, "netif link out error %d", err);
+            pktbuf_free(pktbuf);
+            return err;
+        }
+        return NET_ERR_OK;
+    } else {
+        net_err_t err = netif_put_out(netif, pktbuf, -1);
+        if (err < 0) {
+            dbg_info(DBG_NETIF, "send to netif queue failed %d", err);
+            pktbuf_free(pktbuf);
+            return err;
+        }
+    }
+    return netif->ops->xmit(netif);
 }

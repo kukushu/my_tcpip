@@ -2,6 +2,7 @@
 #define DBG_H
 
 #include "net_cfg.h"
+#include "sys.h"
 
 #define DBG_STYLE_RESET     "\033[0m"
 #define DBG_STYLE_ERROR     "\033[31m"
@@ -25,6 +26,11 @@ void dbg_print(int m_level, int s_level, const char * file, const char * func, i
         }\
     }\
 }
+
+
+
+void dump_mac(const char* msg, const uint8_t* mac);
+void dump_ip_buf(const char* msg, const uint8_t* ip);
 
 
 #define DBG_DISP_ENABLED(module) (module >= DBG_LEVEL_INFO)

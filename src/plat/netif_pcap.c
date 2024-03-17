@@ -34,8 +34,22 @@ void recv_thread (void * arg) {
 
 void xmit_thread (void * arg) {
     plat_printf("xmit thread is running\n");
+    static uint8_t rw_buffer[1514];
+    netif_t * netif = (netif_t *) arg;
+    pcap_t * pcap = (pcap_t *) netif->ops_data;
     while (1) {
-        sys_sleep(1);
+        pktbuf_t * pktbuf = netif_get_out(netif, 0);
+        if (pktbuf == (pktbuf_t *) 0) {
+            continue;
+        } 
+        int total_size = pktbuf->total_size;
+        plat_memset(rw_buffer, 0, sizeof(rw_buffer));
+        pktbuf_read(pktbuf, rw_buffer, total_size);
+        pktbuf_free(pktbuf);
+        if (pcap_inject(pcap, rw_buffer, total_size) == -1) {
+            fprintf(stderr, "pcap_inject failed\n");
+            continue;
+        }
     }
 }
 net_err_t netif_pcap_open (netif_t * netif, void * ops_data) {

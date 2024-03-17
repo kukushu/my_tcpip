@@ -23,6 +23,7 @@ static const char netdev0_phy_ip_linux_ens33[] = "192.168.1.138";
 static const uint8_t netdev0_hwaddr_linux_ens33[] = { 0x00, 0x0c, 0x29, 0xf7, 0x6b, 0xef };
 
 
+static const uint8_t windows_hwaddr[] =  { 0x00, 0x50, 0x56, 0xc0, 0x00, 0x01 };
 // 系统硬件配置
 // 不同网卡配置，共2块网卡
 #if 1

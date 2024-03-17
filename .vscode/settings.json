@@ -10,6 +10,9 @@
         "net_cfg.h": "c",
         "exmsg.h": "c",
         "net.h": "c",
-        "netif.h": "c"
+        "netif.h": "c",
+        "protocol.h": "c",
+        "sys.h": "c",
+        "ipaddr.h": "c"
     }
 }

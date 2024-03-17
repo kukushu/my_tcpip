@@ -7,6 +7,8 @@
 #include "mblock.h"
 #include "pktbuf.h"
 #include "netif.h"
+#include "timer.h"
+#include "ipaddr.h"
 
 pcap_data_t netdev0_data = {.ip = netdev0_phy_ip_linux, .hwaddr = netdev0_hwaddr_linux};
 extern const netif_ops_t netdev_ops;
@@ -19,8 +21,20 @@ net_err_t netdev_init (void) {
         exit(-1);
     }
 
+	ipaddr_t ip, mask, gw;
+	ipaddr_from_str(&ip, netdev0_ip);
+	ipaddr_from_str(&mask, netdev0_mask);
+	ipaddr_from_str(&gw, netdev0_gw);
+	netif_set_addr(netif, &ip, &mask, &gw);
 
-    
+	netif_set_active(netif);
+
+	pktbuf_t * pktbuf = pktbuf_alloc(32);
+	pktbuf_fill(pktbuf, 0x53, 32);
+	ipaddr_t ipaddr;
+	ipaddr_from_str(&ipaddr, "192.168.48.1");
+	netif_out(netif, (ipaddr_t *) &ipaddr, pktbuf);
+
     return NET_ERR_OK;
 }
 
@@ -50,7 +64,7 @@ void nlist_test (void) {
     }
 
     plat_printf("insert first\n");
-    nlist_for_each(p, list) {
+    nlist_for_each(p, &list) {
         tnode_t * tnode = nlist_entry(p, tnode_t, node);
         plat_printf("%d\n", tnode->id);
     }
@@ -66,7 +80,7 @@ void nlist_test (void) {
     }
 
     plat_printf("insert last\n");
-    nlist_for_each(p, list) {
+    nlist_for_each(p, &list) {
         tnode_t * tnode = nlist_entry(p, tnode_t, node);
         plat_printf("%d\n", tnode->id);
     }
@@ -81,7 +95,7 @@ void nlist_test (void) {
     for (int i = 0; i < NODE_CNT; i ++) {
         nlist_insert_after(&list, nlist_first(&list), &node[i].node);
     }
-    nlist_for_each(p, list) {
+    nlist_for_each(p, &list) {
         tnode_t * tnode = nlist_entry(p, tnode_t, node);
         plat_printf("%d\n", tnode->id);
     }
@@ -246,17 +260,53 @@ void pktbuf_test(void) {
 
 
 }
+
+void timer0_proc(net_timer_t* timer, void * arg) {
+	static int count = 1;
+	printf("this is %s: %d\n", timer->name, count++);
+}
+
+void timer1_proc(net_timer_t* timer, void * arg) {
+	static int count = 1;
+	printf("this is %s: %d\n", timer->name, count++);
+}
+
+void timer2_proc(net_timer_t* timer, void * arg) {
+	static int count = 1;
+	printf("this is %s: %d\n", timer->name, count++);
+}
+
+void timer3_proc(net_timer_t* timer, void * arg) {
+	static int count = 1;
+	printf("this is %s: %d\n", timer->name, count++);
+}
+
+
+void timer_test (void) {
+	static net_timer_t t0, t1, t2, t3;
+	net_timer_add(&t0, "t0", timer0_proc, (void *)0, 200, 0);
+
+	// 自动重载定时器
+	net_timer_add(&t1, "t1", timer1_proc, (void *)0, 1000, NET_TIMER_RELOAD);
+	net_timer_add(&t2, "t2", timer2_proc, (void *)0, 1000, NET_TIMER_RELOAD);
+	net_timer_add(&t3, "t3", timer3_proc, (void *)0, 4000, NET_TIMER_RELOAD);
+	net_timer_check_tmo(100);
+	net_timer_check_tmo(900);
+	net_timer_check_tmo(4000);
+}
+
 void basic_test (void) {
     //nlist_test();
     //mblock_test();
-    pktbuf_test();
+    //pktbuf_test();
+	//timer_test();
 }
 
 int main (void) 
 {
     net_init();
     //dbg_test();
-    //basic_test();
+    basic_test();
 
     netdev_init();
 

@@ -3,6 +3,7 @@
 #include "fixq.h"
 #include "sys.h"
 #include "mblock.h"
+#include "timer.h"
 
 
 static void * msg_tbl[EXMSG_MSG_CNT];
@@ -12,14 +13,43 @@ static exmsg_t msg_buffer[EXMSG_MSG_CNT];
 static mblock_t msg_block;
 
 static void do_netif_in (exmsg_t * msg) {
+    netif_t * netif = (netif_t *) msg->netif;
 
+    pktbuf_t * pktbuf;
+    while (pktbuf = netif_get_in(netif, -1)) {
+        dbg_info(DBG_EXMSG, "recv a packet");
+        net_err_t err;
+        if (netif->link_layer) {
+            err = netif->link_layer->in(netif, pktbuf);
+            if (err != NET_ERR_OK) {
+                dbg_warning(DBG_EXMSG, "do netif in failed, link_layer failed");
+                pktbuf_free(pktbuf);
+            }
+        } else {
+            dbg_error(DBG_EXMSG, "no link layer, deal with after");
+            pktbuf_free(pktbuf);
+        }
+    }
 }
 
 static void work_thread (void * arg) {
     dbg_info(DBG_EXMSG, "exmsg is running.....\n");
 
+    net_time_t time;
+    sys_time_curr(&time);
+
+    int time_last = TIMER_SCAN_PERIOD;
     while (1) {
-        exmsg_t * msg = (exmsg_t *) fixq_recv(&msg_queue, 0);
+        int first_tmo = net_timer_first_tmo();
+        exmsg_t * msg = (exmsg_t *) fixq_recv(&msg_queue, first_tmo);
+        int diff_ms = sys_time_goes(&time);
+        time_last -= diff_ms;
+        time_last -= diff_ms;
+        if (time_last < 0) {
+            net_timer_check_tmo(diff_ms);
+            time_last = TIMER_SCAN_PERIOD;
+        }
+
         if (msg) {
             dbg_info(DBG_EXMSG, "recieve a msg(%p): %d", msg, msg->type);
             switch (msg->type) {

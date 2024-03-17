@@ -69,7 +69,7 @@ static inline nlist_node_t * nlist_remove_last (nlist_t * list) {
 
 #define noffset_in_parent(parent_type, node_name) ((char *)&(((parent_type *) 0)->node_name))
 #define noffset_to_parent(node_p, parent_type, node_name) ((char *) node_p - noffset_in_parent(parent_type, node_name))
-#define nlist_for_each(node_p, list) for (node_p = list.first; node_p != NULL; node_p = node_p->next)
+#define nlist_for_each(node_p, list) for (node_p = ((nlist_t *) list)->first; node_p; node_p = node_p->next)
 #define nlist_entry(node_p, parent_type, node_name) ((parent_type *)(node_p ? noffset_to_parent(node_p, parent_type, node_name) :0))
 
 
