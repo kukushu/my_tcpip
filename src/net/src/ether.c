@@ -4,6 +4,7 @@
 #include "tools.h"
 #include "arp.h"
 #include "protocol.h"
+#include "ipv4.h"
 
 static net_err_t is_pkt_ok(ether_pkt_t * frame, int total_size) {
     if (total_size > (sizeof(ether_hdr_t) + ETH_MTU)) {
@@ -123,13 +124,19 @@ static net_err_t ether_in (netif_t * netif, pktbuf_t * buf) {
             if (err < 0) {
                 dbg_error(DBG_ETHER, "remove header failed");
             }
-            return arp_in(netif,buf);
+            return arp_in(netif, buf);
             break;
         }
 
         case NET_PROTOCOL_IPv4: {
-            dbg_info(DBG_ETHER, "received IPv4 packet");
+            arp_update_from_ipbuf(netif, buf);
 
+            dbg_info(DBG_ETHER, "received IPv4 packet");
+            err = pktbuf_remove_header(buf, sizeof(ether_hdr_t));
+            if (err < 0) {
+                dbg_error(DBG_ETHER, "remove header failed");
+            }
+            return ipv4_in(netif, buf);
             break;
         }
     }

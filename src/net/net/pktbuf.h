@@ -30,7 +30,7 @@ typedef struct _pktbuf_t {
     int pos;                                // 当前位置总的偏移量
     pktblk_t* curr_blk;                     // 当前指向的buf
     uint8_t* blk_offset;                    // 在当前buf中的偏移量
-}pktbuf_t;
+} pktbuf_t;
 
 /**
  * 获取当前block的下一个子包

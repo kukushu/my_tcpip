@@ -14,6 +14,7 @@
         "protocol.h": "c",
         "sys.h": "c",
         "ipaddr.h": "c",
-        "arp.h": "c"
+        "arp.h": "c",
+        "icmpv4.h": "c"
     }
 }

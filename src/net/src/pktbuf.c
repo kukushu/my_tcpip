@@ -507,17 +507,20 @@ net_err_t pktbuf_join(pktbuf_t* dest, pktbuf_t* src) {
  * 将包的最开始size个字节，配置成连续空间
  * 常用于对包头进行解析时，或者有其它选项字节时
  */
-net_err_t pktbuf_set_cont(pktbuf_t* buf, int size) {
+net_err_t pktbuf_set_cont(pktbuf_t *buf, int size)
+{
     dbg_assert(buf->ref != 0, "buf freed")
-    // 必须要有足够的长度
-    if (size > buf->total_size) {
-        dbg_error(DBG_BUF,"size(%d) > total_size(%d)", size, buf->total_size);
+        // 必须要有足够的长度
+    if (size > buf->total_size)
+    {
+        dbg_error(DBG_BUF, "size(%d) > total_size(%d)", size, buf->total_size);
         return NET_ERR_SIZE;
     }
 
     // 超过1个POOL的大小，返回错误
-    if (size > PKTBUF_BLK_SIZE) {
-        dbg_error(DBG_BUF,"size too big > %d", PKTBUF_BLK_SIZE);
+    if (size > PKTBUF_BLK_SIZE)
+    {
+        dbg_error(DBG_BUF, "size too big > %d", PKTBUF_BLK_SIZE);
         return NET_ERR_SIZE;
     }
 

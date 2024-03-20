@@ -69,7 +69,7 @@ net_err_t netif_init (void);
 netif_t * netif_open (const char * dev_name, const netif_ops_t * ops, void * ops_data);
 void * netif_set_hwaddr (netif_t * netif, const uint8_t * hwaddr, int len);
 net_err_t netif_set_addr (netif_t * netif, ipaddr_t * ip, ipaddr_t * netmask, ipaddr_t * gateway);
-
+netif_t * netif_get_default (void);
 
 
 net_err_t netif_put_in (netif_t * netif, pktbuf_t * pktbuf, int tmo);

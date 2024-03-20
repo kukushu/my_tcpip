@@ -4,6 +4,7 @@
 #include "sys.h"
 #include "mblock.h"
 #include "timer.h"
+#include "ipv4.h"
 
 
 static void * msg_tbl[EXMSG_MSG_CNT];
@@ -27,7 +28,11 @@ static void do_netif_in (exmsg_t * msg) {
             }
         } else {
             dbg_error(DBG_EXMSG, "no link layer, deal with after");
-            pktbuf_free(pktbuf);
+            err = ipv4_in(netif, pktbuf);
+            if (err != NET_ERR_OK) {
+                dbg_warning(DBG_EXMSG, "no link layer, ipv4_in failed");
+                pktbuf_free(pktbuf);
+            }
         }
     }
 }

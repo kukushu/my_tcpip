@@ -1,9 +1,13 @@
 #include "arp.h"
+#include "tools.h"
 #include "protocol.h"
 #include "dbg.h"
 #include "tools.h"
 #include "mblock.h"
 #include "timer.h"
+#include "ipv4.h"
+
+static net_err_t cache_insert (netif_t * netif, uint8_t * ipaddr, uint8_t * hwaddr, int force);
 
 #define to_scan_cnt(tmo)     (tmo / ARP_TIMER_TMO)
 
@@ -79,6 +83,30 @@ static void arp_pkt_display (arp_pkt_t * packet) {
 #define display_arp_tbl()
 #endif
 
+void arp_update_from_ipbuf (netif_t * netif, pktbuf_t * pkt) {
+    net_err_t err = pktbuf_set_cont(pkt, sizeof(ipv4_hdr_t) + sizeof(ether_hdr_t));
+    if (err < 0) {
+        dbg_error(DBG_ARP, "adjust header failed. err = %d", err);
+        return ;
+    }
+    ether_hdr_t * eth_hdr = (ether_hdr_t *) pktbuf_data(pkt);
+    ipv4_hdr_t * ip_hdr = (ipv4_hdr_t *) ((uint8_t *) eth_hdr + sizeof(ether_hdr_t));
+
+    if (ip_hdr->version != NET_VERSION_IPV4) {
+        dbg_warning(DBG_ARP, "ip packet version mismatch");
+        return ;
+    }
+    int total_size = x_ntohs(ip_hdr->total_len);
+    if ((total_size < sizeof(ipv4_hdr_t)) || (pkt->total_size < total_size)) {
+        dbg_warning(DBG_IP, "ip packet size mismatch");
+        return ;
+    }
+    ipaddr_t dest_ip;
+    ipaddr_from_buf(&dest_ip, ip_hdr->dest_ip);
+    if (ipaddr_is_match(&netif->ipaddr, &dest_ip, &netif->netmask)) {
+        cache_insert(netif, ip_hdr->src_ip, eth_hdr->src, 0);
+    }
+}
 
 static net_err_t is_pkt_ok(arp_pkt_t* arp_packet, uint16_t size, netif_t* netif) {
     if (size < sizeof(arp_pkt_t)) {

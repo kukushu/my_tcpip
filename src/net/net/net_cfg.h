@@ -10,8 +10,10 @@
 #define DBG_NETIF       DBG_LEVEL_ERROR
 #define DBG_ETHER       DBG_LEVEL_ERROR
 #define DBG_TOOLS       DBG_LEVEL_ERROR
-#define DBG_TIMER       DBG_LEVEL_INFO
-#define DBG_ARP         DBG_LEVEL_INFO
+#define DBG_TIMER       DBG_LEVEL_ERROR
+#define DBG_ARP         DBG_LEVEL_ERROR
+#define DBG_IP          DBG_LEVEL_INFO
+#define DBG_ICMP        DBG_LEVEL_INFO
 
 #define NET_ENDIAN_LITTLE       1                   // 系统是否为小端
 
@@ -39,7 +41,14 @@
 #define ARP_ENTRY_PENDING_TMO 3
 #define ARP_ENTRY_CNT         7
 #define ARP_ENTRY_RETRY_CNT   6
-#define ARP_ENTRY_STABLE_TMO  5
+#define ARP_ENTRY_STABLE_TMO  100
+
+#define IP_FRAGS_MAX_NR               10              // 最多支持的分片控制数量
+#define IP_FRAG_MAX_BUF_NR             10              // 每个IP分片最多允许停留的buf数量
+#define IP_FRAG_SCAN_PERIOD         (1)             // IP分片表扫描周期，以秒为单位
+#define IP_FRAG_TMO                 5               // IP分片最大超时时间，以秒为单位
+#define IP_RTABLE_SIZE				    16          // 路由表项数量
+
 
 
 #endif

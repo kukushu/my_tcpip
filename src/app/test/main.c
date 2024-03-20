@@ -1,4 +1,5 @@
 #include "sys.h"
+#include "protocol.h"
 #include "net.h"
 #include "netif_pcap.h"
 #include "dbg.h"
@@ -9,6 +10,7 @@
 #include "netif.h"
 #include "timer.h"
 #include "ipaddr.h"
+#include "ipv4.h"
 
 pcap_data_t netdev0_data = {.ip = netdev0_phy_ip_linux, .hwaddr = netdev0_hwaddr_linux};
 extern const netif_ops_t netdev_ops;
@@ -31,15 +33,19 @@ net_err_t netdev_init (void) {
 
 	pktbuf_t * pktbuf = pktbuf_alloc(32);
 	pktbuf_fill(pktbuf, 0x53, 32);
-	ipaddr_t ipaddr;
-	ipaddr_from_str(&ipaddr, "192.168.48.1");
-	net if_out(netif, (ipaddr_t *) &ipaddr, pktbuf);
+	ipaddr_t dest_ipaddr;
+	ipaddr_from_str(&dest_ipaddr, "192.168.48.1");
+	/*
+	netif_out(netif, (ipaddr_t *) &ipaddr, pktbuf);
 
 	pktbuf = pktbuf_alloc(32);
 	pktbuf_fill(pktbuf, 0xa5, 32);
 	ipaddr_from_str(&ipaddr, "192.168.48.255");
 	netif_out(netif, (ipaddr_t *) &ipaddr, pktbuf);
-	
+	*/
+	ipaddr_t src_ipaddr;
+	ipaddr_from_str(&src_ipaddr, "192.168.48.3");
+	//ipv4_out(NET_PROTOCOL_ICMPv4, &dest_ipaddr, &src_ipaddr, pktbuf);
     return NET_ERR_OK;
 }
 

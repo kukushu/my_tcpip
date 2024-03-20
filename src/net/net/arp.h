@@ -54,7 +54,7 @@ net_err_t arp_in (netif_t * netif, pktbuf_t * pktbuf);
 net_err_t arp_make_reply(netif_t * netif, pktbuf_t * pktbuf);
 net_err_t arp_resolve (netif_t * netif, ipaddr_t * ipaddr, pktbuf_t * pktbuf);
 void arp_clear (netif_t * netif);
-
+void arp_update_from_ipbuf (netif_t * netif, pktbuf_t * pkt);
 
 
 

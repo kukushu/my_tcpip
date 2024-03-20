@@ -9,6 +9,14 @@ static nlist_t netif_list;
 static netif_t * netif_default;
 static const link_layer_t * link_layers[NETIF_TYPE_SIZE];
 
+netif_t * netif_get_default (void) {
+    return netif_default;
+}
+
+static void netif_set_default (netif_t * netif) {
+    
+    netif_default = netif;
+}
 
 net_err_t netif_register_layer (const link_layer_t * link_layer) {
     if ((link_layer->type == NETIF_TYPE_NONE) || (link_layer->type > NETIF_TYPE_SIZE)) {
@@ -173,6 +181,9 @@ net_err_t netif_set_active(netif_t * netif) {
     if (netif->state != NETIF_OPENED) {
         dbg_error(DBG_NETIF, "netif is not opened");
         return NET_ERR_STATE;
+    }
+    if (!netif_default && (netif->type != NETIF_TYPE_LOOP)) {
+        netif_set_default(netif);
     }
     if (netif->link_layer) {
         net_err_t err = netif->link_layer->open(netif);

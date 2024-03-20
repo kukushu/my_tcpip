@@ -9,7 +9,10 @@
 #include "arp.h"
 #include "tools.h"
 #include "timer.h"
- 
+#include "net.h"
+#include "ipv4.h"
+#include "icmpv4.h"
+
 net_err_t net_init (void) {
     dbg_info(DBG_INIT, "net_init");
     net_plat_init();
@@ -21,6 +24,8 @@ net_err_t net_init (void) {
     ether_init();
     loop_init();
     arp_init();
+    ipv4_init();
+    icmpv4_init();
     return NET_ERR_OK;
 }
 
