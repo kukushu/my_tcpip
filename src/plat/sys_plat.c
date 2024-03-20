@@ -24,6 +24,115 @@
 #include <semaphore.h>
 #include <sys/time.h>
 
+
+
+
+
+
+
+#include <pthread.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
+#include <errno.h>
+
+
+
+// 创建信号量
+sys_sem_t sys_sem_create(int init_count) {
+    sys_sem_t sem = malloc(sizeof(struct _xsys_sem_t));
+    if (!sem) {
+        return NULL;
+    }
+
+    sem->count = init_count;
+    pthread_mutex_init(&sem->mutex, NULL);
+    pthread_cond_init(&sem->cond, NULL);
+
+    return sem;
+}
+
+// 销毁信号量
+void sys_sem_free(sys_sem_t sem) {
+    if (sem) {
+        pthread_cond_destroy(&sem->cond);
+        pthread_mutex_destroy(&sem->mutex);
+        free(sem);
+    }
+}
+
+// 等待信号量
+int sys_sem_wait(sys_sem_t sem, uint32_t tmo_ms) {
+    pthread_mutex_lock(&sem->mutex);
+
+    while (sem->count <= 0) {
+        if (tmo_ms == 0) {
+            // 无超时等待
+            pthread_cond_wait(&sem->cond, &sem->mutex);
+        } else {
+            // 有超时等待
+            struct timespec ts;
+            clock_gettime(CLOCK_REALTIME, &ts);
+            ts.tv_sec += tmo_ms / 1000;
+            ts.tv_nsec += (tmo_ms % 1000) * 1000000;
+            if (ts.tv_nsec >= 1000000000) {
+                ts.tv_sec++;
+                ts.tv_nsec -= 1000000000;
+            }
+
+            int ret = pthread_cond_timedwait(&sem->cond, &sem->mutex, &ts);
+            if (ret == ETIMEDOUT) {
+                pthread_mutex_unlock(&sem->mutex);
+                return -1;
+            }
+        }
+    }
+
+    sem->count--;
+    pthread_mutex_unlock(&sem->mutex);
+    return 0;
+}
+
+// 通知信号量
+void sys_sem_notify(sys_sem_t sem) {
+    pthread_mutex_lock(&sem->mutex);
+    sem->count++;
+    pthread_cond_signal(&sem->cond);
+    pthread_mutex_unlock(&sem->mutex);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int load_pcap_lib(void) {
     return 0;
 }
@@ -53,84 +162,7 @@ int sys_time_goes (net_time_t * pre) {
     return diff_ms;
 }
 
-sys_sem_t sys_sem_create(int init_count) {
-    sys_sem_t sem = (sys_sem_t)malloc(sizeof(struct _xsys_sem_t));
-    if (!sem) {
-        return (sys_sem_t)0;
-    }
 
-    sem->count = init_count;
-
-    int err = pthread_cond_init(&(sem->cond), NULL);
-    if (err) {
-        return (sys_sem_t)0;
-    }
-
-    err = pthread_mutex_init(&(sem->locker), NULL);
-    if (err) {
-        return (sys_sem_t)0;
-    }
-
-    return sem;
-}
-
-/**
- * 释放掉信号量
- */
-void sys_sem_free(sys_sem_t sem) {
-    pthread_cond_destroy(&(sem->cond));
-    pthread_mutex_destroy(&(sem->locker));
-    free(sem);
-}
-
-/**
- * 等待信号量
- * @param sem 等待的信号量
- * @param tmo 等待的超时时间
- */
-int sys_sem_wait(sys_sem_t sem, uint32_t tmo_ms) {
-    pthread_mutex_lock(&(sem->locker));
-
-    if (sem->count <= 0) {
-        int ret;
-
-        if (tmo_ms > 0) {
-            struct timespec ts;
-            ts.tv_nsec = (tmo_ms % 1000) * 1000000L;
-            ts.tv_sec = time(NULL) + tmo_ms / 1000;
-            ret = pthread_cond_timedwait(&sem->cond, &sem->locker, &ts);
-            if (ret == ETIMEDOUT) {
-                pthread_mutex_unlock(&(sem->locker));
-                return -1;
-            }
-        } else {
-            ret = pthread_cond_wait(&sem->cond, &sem->locker);
-            if (ret < 0) {
-                pthread_mutex_unlock(&(sem->locker));
-                return -1;
-            }
-        }
-    }
-
-    sem->count--;
-    pthread_mutex_unlock(&(sem->locker));
-    return 0;
-}
-
-/**
- * 通知信号量
- * @param sem 待通知的信号量
- */
-void sys_sem_notify(sys_sem_t sem) {
-    pthread_mutex_lock(&(sem->locker));
-
-    sem->count++;
-
-    // 通知线程，有新的资源可用
-    pthread_cond_signal(&(sem->cond));
-
-    pthread_mutex_unlock(&(sem->locker));
-}
 
 /**
  * 创建一个线程

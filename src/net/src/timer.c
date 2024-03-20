@@ -131,7 +131,7 @@ net_err_t net_timer_check_tmo (int diff_ms) {
             insert_timer(timer);
         }
     }
-    display_timer_list(); 
+    //display_timer_list(); 
 
     return NET_ERR_OK;
 }

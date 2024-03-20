@@ -27,7 +27,7 @@ static const uint8_t windows_hwaddr[] =  { 0x00, 0x50, 0x56, 0xc0, 0x00, 0x01 };
 // 系统硬件配置
 // 不同网卡配置，共2块网卡
 #if 1
-static const char netdev0_ip[] = "192.168.74.2";
+static const char netdev0_ip[] = "192.168.48.3";
 static const char netdev0_gw[] = "192.168.74.1";
 static const char friend0_ip[] = "192.168.74.3";
 static const char netdev0_phy_ip[] = "192.168.74.1";    // 用于收发包的真实网卡ip地址，在qemu上不需要使用
@@ -84,7 +84,7 @@ typedef struct timeval net_time_t;      // 时间类型
 typedef struct _xsys_sem_t {
     int count;                          // 信号量计数
     pthread_cond_t cond;                // 条件变量
-    pthread_mutex_t locker;             // 访问C的互斥锁
+    pthread_mutex_t mutex;             // 访问C的互斥锁
 } * sys_sem_t;
 
 typedef pthread_t sys_thread_t;           // 线程重定义

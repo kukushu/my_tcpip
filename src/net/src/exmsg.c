@@ -37,13 +37,13 @@ static void work_thread (void * arg) {
 
     net_time_t time;
     sys_time_curr(&time);
-
+    int index = 0;
     int time_last = TIMER_SCAN_PERIOD;
     while (1) {
         int first_tmo = net_timer_first_tmo();
         exmsg_t * msg = (exmsg_t *) fixq_recv(&msg_queue, first_tmo);
+        
         int diff_ms = sys_time_goes(&time);
-        time_last -= diff_ms;
         time_last -= diff_ms;
         if (time_last < 0) {
             net_timer_check_tmo(diff_ms);

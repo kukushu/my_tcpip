@@ -32,6 +32,10 @@ void dbg_print(int m_level, int s_level, const char * file, const char * func, i
 void dump_mac(const char* msg, const uint8_t* mac);
 void dump_ip_buf(const char* msg, const uint8_t* ip);
 
+#define dbg_dump_ip_buf(module, msg, ip)   {if (module >= DBG_LEVEL_INFO) dump_ip_buf(msg, ip); }
+#define dbg_dump_ip(module, msg, ip)   {if (module >= DBG_LEVEL_INFO) dump_ip_buf(msg, (ip)->a_addr); }
+#define dbg_dump_mac(module, msg, mac)   {if (module >= DBG_LEVEL_INFO) dump_mac(msg, mac); }
+
 
 #define DBG_DISP_ENABLED(module) (module >= DBG_LEVEL_INFO)
 

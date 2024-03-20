@@ -26,7 +26,7 @@ const uint8_t * ether_broadcast_addr (void) {
 }
 
 #if DBG_DISP_ENABLED(DBG_ETHER)
-static void display_ether_display(char * title, ether_pkt_t * pkt, int size) {
+static void display_ether_pkt(char * title, ether_pkt_t * pkt, int size) {
     ether_hdr_t * hdr = (ether_hdr_t *)pkt;
 
     plat_printf("\n--------------- %s ------------------ \n", title);
@@ -48,7 +48,7 @@ static void display_ether_display(char * title, ether_pkt_t * pkt, int size) {
     plat_printf("\n");
 }
 #else
-#define display_ether_display(title, pkt, size)
+#define display_ether_pkt(title, pkt, size)
 #endif
 
 net_err_t ether_raw_out (netif_t * netif, uint16_t protocol, const uint8_t * dest, pktbuf_t * pktbuf) {
@@ -79,7 +79,7 @@ net_err_t ether_raw_out (netif_t * netif, uint16_t protocol, const uint8_t * des
     pkt->hdr.protocol = x_htons(protocol);        
 
     // 显示包信息
-    display_ether_display("ether out", pkt, size);
+    display_ether_pkt("ether out", pkt, size);
 
 
     if (plat_memcmp(netif->hwaddr.addr, dest, ETH_HWA_SIZE) == 0) {
@@ -94,14 +94,15 @@ net_err_t ether_raw_out (netif_t * netif, uint16_t protocol, const uint8_t * des
     return netif->ops->xmit(netif);
 }
 
-net_err_t ether_open (netif_t * netif) {
+static net_err_t ether_open (netif_t * netif) {
     dbg_info(DBG_ETHER, "ether opened");
-    return NET_ERR_OK;
-}
-void ether_close (netif_t * netif) {
 
+    return arp_make_no_reply(netif);
 }
-net_err_t ether_in (netif_t * netif, pktbuf_t * buf) {
+static void ether_close (netif_t * netif) {
+    arp_clear(netif);
+}
+static net_err_t ether_in (netif_t * netif, pktbuf_t * buf) {
     dbg_info(DBG_ETHER, "ether in:");
 
     pktbuf_set_cont(buf, sizeof(ether_hdr_t));
@@ -113,11 +114,16 @@ net_err_t ether_in (netif_t * netif, pktbuf_t * buf) {
         return err;
     }
 
-    display_ether_display("ether in", pkt, buf->total_size);
+    display_ether_pkt("ether in", pkt, buf->total_size);
 
     switch (x_ntohs(pkt->hdr.protocol)) {
         case NET_PROTOCOL_ARP: {
             dbg_info(DBG_ETHER, "received ARP packet");
+            err = pktbuf_remove_header(buf, sizeof(ether_hdr_t));
+            if (err < 0) {
+                dbg_error(DBG_ETHER, "remove header failed");
+            }
+            return arp_in(netif,buf);
             break;
         }
 
@@ -130,13 +136,17 @@ net_err_t ether_in (netif_t * netif, pktbuf_t * buf) {
     pktbuf_free(buf);
     return NET_ERR_OK;
 }
-
-net_err_t ether_out (netif_t * netif, ipaddr_t * ipaddr, pktbuf_t * pktbuf) {
+static net_err_t ether_out (netif_t * netif, ipaddr_t * ipaddr, pktbuf_t * pktbuf) {
     if (ipaddr_is_equal(&netif->ipaddr, ipaddr)) {
         return ether_raw_out(netif, NET_PROTOCOL_IPv4, (const uint8_t *)netif->hwaddr.addr, pktbuf);
     }
+
     const uint8_t * hwaddr = arp_find(netif, ipaddr);
-    return ether_raw_out(netif, NET_PROTOCOL_IPv4, hwaddr, pktbuf);
+    if (!hwaddr) {
+        return arp_resolve(netif, ipaddr, pktbuf);
+    } else {
+        return ether_raw_out(netif, NET_PROTOCOL_IPv4, hwaddr, pktbuf);
+    }
 }
 
 net_err_t ether_init (void) {

@@ -13,6 +13,7 @@
         "netif.h": "c",
         "protocol.h": "c",
         "sys.h": "c",
-        "ipaddr.h": "c"
+        "ipaddr.h": "c",
+        "arp.h": "c"
     }
 }
