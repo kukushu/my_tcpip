@@ -12,8 +12,10 @@
 #define DBG_TOOLS       DBG_LEVEL_ERROR
 #define DBG_TIMER       DBG_LEVEL_ERROR
 #define DBG_ARP         DBG_LEVEL_ERROR
-#define DBG_IP          DBG_LEVEL_INFO
+#define DBG_IP          DBG_LEVEL_ERROR
 #define DBG_ICMP        DBG_LEVEL_ERROR
+#define DBG_SOCKET      DBG_LEVEL_INFO
+#define DBG_RAW         DBG_LEVEL_INFO
 
 #define NET_ENDIAN_LITTLE       1                   // 系统是否为小端
 
@@ -49,6 +51,14 @@
 #define IP_FRAG_TMO                 5               // IP分片最大超时时间，以秒为单位
 #define IP_RTABLE_SIZE				    16          // 路由表项数量
 
+#define UDP_MAX_NR                  4
+
+
+#define TCP_MAX_NR                  10
+
+
+#define RAW_MAX_NR                  5
+#define RAW_MAX_RECV                50
 
 
 #endif

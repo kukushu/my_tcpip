@@ -15,6 +15,10 @@
         "sys.h": "c",
         "ipaddr.h": "c",
         "arp.h": "c",
-        "icmpv4.h": "c"
-    }
+        "icmpv4.h": "c",
+        "netapi.h": "c",
+        "ping.h": "c",
+        "sock.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "enabled"
 }

@@ -2,6 +2,7 @@
 #define NET_ERR_H
 
 typedef enum _net_err_t {
+    NET_ERR_NEED_WAIT = 1,
     NET_ERR_OK = 0,
     NET_ERR_SYS = -1,
     NET_ERR_MEM = -2,
@@ -17,6 +18,9 @@ typedef enum _net_err_t {
     NET_ERR_NOT_SUPPORT = -12,
     NET_ERR_UNREACH = -13,
     NET_ERR_CHKSUM = -14,
+    NET_ERR_UNKNOWN = -15,
+    NET_ERR_CLOSE = -16,
+    NET_ERR_CONNECTED = -17,
 } net_err_t;
 
 

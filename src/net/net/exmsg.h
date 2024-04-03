@@ -3,9 +3,11 @@
 
 #include "net_err.h"
 #include "netif.h"
+#include "sock.h"
 
 struct _func_msg_t;
-typedef net_err_t(* exmsg_func_t) (struct _func_msg_t * msg);
+struct _sock_req_t;
+typedef net_err_t(* exmsg_func_t) (struct _sock_req_t * param);
 
 typedef struct _func_msg_t {
     sys_thread_t thread;
@@ -30,6 +32,7 @@ net_err_t exmsg_init (void);
 net_err_t exmsg_start (void);
 
 net_err_t exmsg_netif_in (netif_t * netif);
+net_err_t exmsg_func_exec (exmsg_func_t func, void * param);
 
 
 #endif

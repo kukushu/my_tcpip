@@ -6,6 +6,8 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src/plat",
                 "${workspaceFolder}/src/net/net",
+                "${workspaceFolder}/src/app",
+
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

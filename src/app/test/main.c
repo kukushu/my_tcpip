@@ -11,6 +11,7 @@
 #include "timer.h"
 #include "ipaddr.h"
 #include "ipv4.h"
+#include "ping/ping.h"
 
 pcap_data_t netdev0_data = {.ip = netdev0_phy_ip_linux, .hwaddr = netdev0_hwaddr_linux};
 extern const netif_ops_t netdev_ops;
@@ -323,6 +324,9 @@ int main (void)
     netdev_init();
 
     net_start();
+
+	ping_t ping;
+	ping_run(&ping, "192.168.48.1", 4, 64, 1000);
 
 
     while (1) {

@@ -12,6 +12,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/src/plat
     ${PROJECT_SOURCE_DIR}/src/net/net
+    ${PROJECT_SOURCE_DIR}/src/app
 )
 
 file(GLOB_RECURSE SOURCE_LIST "src/*.c" "src/*.h")

@@ -100,9 +100,10 @@ net_err_t icmpv4_in(ipaddr_t *src, ipaddr_t* netif_ip, pktbuf_t *buf) {
             dbg_dump_ip(DBG_ICMP, "icmp request, ip:", src);
             return icmpv4_echo_reply(src, netif_ip, buf);
         }
+        break;
         default: {
             // 不能识别的统一交由raw处理
-       //     err = raw_in(buf);
+            err = raw_in(buf);
             if (err < 0) {
                 dbg_warning(DBG_ICMP, "raw in failed.");
                 return err;

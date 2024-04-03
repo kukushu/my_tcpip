@@ -37,6 +37,14 @@ static void do_netif_in (exmsg_t * msg) {
     }
 }
 
+void do_func (func_msg_t * func_msg) {
+    dbg_info(DBG_EXMSG, "call func");
+
+    func_msg->err = func_msg->func(func_msg->param);
+    sys_sem_notify(func_msg->wait_sem);
+    dbg_info(DBG_EXMSG, "func exec complete");
+}
+
 static void work_thread (void * arg) {
     dbg_info(DBG_EXMSG, "exmsg is running.....\n");
 
@@ -62,7 +70,7 @@ static void work_thread (void * arg) {
                     do_netif_in(msg);
                     break;
                 case NET_EXMSG_FUN:
-                    //do_func(msg->func);
+                    do_func(msg->func);
                     break;
             }
             mblock_free(&msg_block, msg);
@@ -110,4 +118,35 @@ net_err_t exmsg_netif_in (netif_t * netif) {
         return err;
     }
     return NET_ERR_OK;
+}
+
+net_err_t exmsg_func_exec (exmsg_func_t func, void * param) {
+    func_msg_t func_msg;
+    func_msg.thread = sys_thread_self();
+    func_msg.func = func;
+    func_msg.param = param;
+    func_msg.err = NET_ERR_OK;
+    func_msg.wait_sem = sys_sem_create(0);
+    if (func_msg.wait_sem == SYS_SEM_INVALID) {
+        dbg_error(DBG_EXMSG, "create func msg failed");
+        return NET_ERR_MEM;
+    }
+
+    exmsg_t * msg = (exmsg_t *) mblock_alloc(&msg_block, 0);
+    msg->type = NET_EXMSG_FUN;
+    msg->func = &func_msg;
+
+    dbg_info(DBG_EXMSG, "send func msg");
+    net_err_t err = fixq_send(&msg_queue, msg, 0);
+    if (err < 0) {
+        dbg_error(DBG_EXMSG, "send func msg failed");
+        mblock_free(&msg_block, msg);
+        sys_sem_free(func_msg.wait_sem);
+        return err;
+    }
+
+    sys_sem_wait(func_msg.wait_sem, 0);
+    dbg_info(DBG_EXMSG, "the end of func msg");
+    sys_sem_free(func_msg.wait_sem);
+    return func_msg.err;
 }
